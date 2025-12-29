@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURA COUNTER - Leaderboard</title>
+    <style>
+        :root {
+            --bg: #050505;
+            --card: #111;
+            --text: #ffffff;
+            --accent: #00f2ff;
+            --danger: #ff4d4d;
+            --gold: #ffd700;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 8vw, 3.5rem);
+            text-transform: uppercase;
+            letter-spacing: 8px;
+            margin-bottom: 40px;
+            text-shadow: 0 0 15px var(--accent);
+            text-align: center;
+        }
+
+        /* Container Grid che permette l'ordinamento dinamico */
+        .container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            width: 100%;
+            max-width: 1100px;
+            /* Importante per l'ordinamento tramite JS */
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .user-card {
+            background: var(--card);
+            padding: 30px;
+            border-radius: 24px;
+            text-align: center;
+            border: 1px solid #222;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 300px;
+            position: relative;
+        }
+
+        /* Effetto per il primo in classifica */
+        .user-card.top-1 {
+            border-color: var(--gold);
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.15);
+            transform: scale(1.05);
+        }
+
+        .user-card.top-1::after {
+            content: "👑";
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 2rem;
+        }
+
+        .name {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .aura-value {
+            font-size: 4.5rem;
+            font-weight: 900;
+            margin: 20px 0;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .updated {
+            color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        button {
+            background: #1a1a1a;
+            border: 2px solid #333;
+            color: white;
+            padding: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
+        }
+
+        button:hover { border-color: var(--accent); }
+        button.minus:hover { border-color: var(--danger); color: var(--danger); }
+        button:active { transform: scale(0.9); }
+
+        /* Badge posizione */
+        .rank-badge {
+            font-size: 0.9rem;
+            background: #333;
+            padding: 4px 12px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>AURA COUNTER</h1>
+
+    <div class="container" id="leaderboard">
+        <div id="card-salvo" class="user-card">
+            <div id="rank-salvo" class="rank-badge"># -</div>
+            <div class="name">Salvo</div>
+            <div id="aura-salvo" class="aura-value">0</div>
+            <div class="controls">
+                <button class="minus" onclick="updateAura('salvo', -100)">-100</button>
+                <button onclick="updateAura('salvo', 100)">+100</button>
+            </div>
+        </div>
+
+        <div id="card-giovanni" class="user-card">
+            <div id="rank-giovanni" class="rank-badge"># -</div>
+            <div class="name">Giovanni</div>
+            <div id="aura-giovanni" class="aura-value">0</div>
+            <div class="controls">
+                <button class="minus" onclick="updateAura('giovanni', -100)">-100</button>
+                <button onclick="updateAura('giovanni', 100)">+100</button>
+            </div>
+        </div>
+
+        <div id="card-gioele" class="user-card">
+            <div id="rank-gioele" class="rank-badge"># -</div>
+            <div class="name">Gioele</div>
+            <div id="aura-gioele" class="aura-value">0</div>
+            <div class="controls">
+                <button class="minus" onclick="updateAura('gioele', -100)">-100</button>
+                <button onclick="updateAura('gioele', 100)">+100</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue, runTransaction } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVblXVQICGhBSk6AKbIr6JejW-IrlGbdU",
+            authDomain: "aura-counter-1bca2.firebaseapp.com",
+            databaseURL: "https://aura-counter-1bca2-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "aura-counter-1bca2",
+            storageBucket: "aura-counter-1bca2.firebasestorage.app",
+            messagingSenderId: "182869208306",
+            appId: "1:182869208306:web:14adc77ed60a7517fd746b",
+            measurementId: "G-K76F9R0CHY"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Aggiornamento Aura
+        window.updateAura = (user, amount) => {
+            const userRef = ref(db, 'aura/' + user);
+            runTransaction(userRef, (currentValue) => {
+                return (currentValue || 0) + amount;
+            });
+        };
+
+        // Gestione Real-time e Classifica
+        const auraRef = ref(db, 'aura/');
+        onValue(auraRef, (snapshot) => {
+            const data = snapshot.val() || { salvo: 0, giovanni: 0, gioele: 0 };
+            
+            // Crea array per ordinare
+            const players = [
+                { id: 'salvo', aura: data.salvo || 0 },
+                { id: 'giovanni', aura: data.giovanni || 0 },
+                { id: 'gioele', aura: data.gioele || 0 }
+            ];
+
+            // Ordina per aura decrescente
+            players.sort((a, b) => b.aura - a.aura);
+
+            players.forEach((player, index) => {
+                const card = document.getElementById(`card-${player.id}`);
+                const valueDisplay = document.getElementById(`aura-${player.id}`);
+                const rankDisplay = document.getElementById(`rank-${player.id}`);
+
+                // Aggiorna numero con animazione se cambiato
+                if (valueDisplay.innerText != player.aura) {
+                    valueDisplay.innerText = player.aura;
+                    valueDisplay.classList.add('updated');
+                    setTimeout(() => valueDisplay.classList.remove('updated'), 400);
+                }
+
+                // Cambia ordine CSS (0 è il primo, 1 secondo, etc)
+                card.style.order = index;
+                rankDisplay.innerText = `#${index + 1}`;
+
+                // Aggiungi corona al primo
+                if (index === 0) {
+                    card.classList.add('top-1');
+                } else {
+                    card.classList.remove('top-1');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
