@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AURA COUNTER - Leaderboard & Logs</title>
+    <title>AURA COUNTER - Leaderboard & Motivations</title>
     <style>
         :root {
             --bg: #050505;
@@ -32,52 +32,54 @@
         .background-photos {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1; pointer-events: none; opacity: 0.3;
+            z-index: -1; pointer-events: none; opacity: 0.2;
         }
         .sparse-photo {
-            position: absolute; width: 200px;
-            border: 5px solid white;
+            position: absolute; width: 180px;
+            border: 4px solid white;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
         .p1 { top: 10%; left: 5%; transform: rotate(-15deg); }
-        .p2 { top: 60%; left: 80%; transform: rotate(10deg); width: 250px; }
-        .p3 { top: 75%; left: 10%; transform: rotate(5deg); }
-        .p4 { top: 5%; left: 75%; transform: rotate(-10deg); }
+        .p2 { top: 65%; left: 82%; transform: rotate(12deg); width: 220px; }
+        .p3 { top: 78%; left: 8%; transform: rotate(5deg); }
+        .p4 { top: 5%; left: 78%; transform: rotate(-8deg); }
 
         /* --- CRONOLOGIA --- */
         .logs-container {
             width: 100%;
-            max-width: 500px;
-            background: rgba(0, 0, 0, 0.7);
+            max-width: 600px;
+            background: rgba(0, 0, 0, 0.8);
             border: 1px solid #333;
             border-radius: 15px;
             margin-top: 30px;
             padding: 15px;
-            max-height: 200px;
+            max-height: 250px;
             overflow-y: auto;
             z-index: 10;
-            backdrop-filter: blur(5px);
+            backdrop-filter: blur(10px);
         }
         .log-entry {
-            padding: 5px 0;
+            padding: 8px 0;
             border-bottom: 1px solid #222;
             font-size: 0.85rem;
-            color: #ccc;
+            color: #ddd;
+            line-height: 1.4;
         }
         .log-entry b { color: var(--accent); }
-        .log-entry .neg { color: var(--danger); }
-        .log-entry .pos { color: #00ff88; }
+        .log-entry .neg { color: var(--danger); font-weight: bold; }
+        .log-entry .pos { color: #00ff88; font-weight: bold; }
+        .log-reason { color: #888; font-style: italic; display: block; margin-top: 2px; }
 
         /* --- MUSICA --- */
         #music-control {
             position: fixed; bottom: 20px; right: 20px; z-index: 100;
-            background: rgba(0, 242, 255, 0.2); border: 1px solid var(--accent);
+            background: rgba(0, 242, 255, 0.15); border: 1px solid var(--accent);
             color: var(--accent); padding: 10px 20px; border-radius: 50px;
-            cursor: pointer; font-weight: bold; backdrop-filter: blur(5px);
+            cursor: pointer; font-weight: bold;
         }
 
         h1 {
-            font-size: clamp(2rem, 8vw, 3.5rem);
+            font-size: clamp(2rem, 8vw, 3rem);
             text-transform: uppercase;
             letter-spacing: 8px;
             margin-bottom: 40px;
@@ -87,44 +89,56 @@
 
         .container {
             display: flex; flex-wrap: wrap; justify-content: center;
-            gap: 25px; width: 100%; max-width: 1100px; z-index: 10;
+            gap: 20px; width: 100%; max-width: 1100px; z-index: 10;
         }
 
         .user-card {
             background: var(--card); backdrop-filter: blur(10px);
-            padding: 30px; border-radius: 24px; text-align: center;
+            padding: 25px; border-radius: 24px; text-align: center;
             border: 1px solid #333; transition: all 0.5s ease;
-            width: 300px; position: relative;
+            width: 310px; position: relative;
         }
 
-        .user-card.top-1 { border-color: var(--gold); box-shadow: 0 0 40px rgba(255, 215, 0, 0.2); transform: scale(1.05); }
+        .user-card.top-1 { border-color: var(--gold); box-shadow: 0 0 30px rgba(255, 215, 0, 0.15); }
         .user-card.top-1::after {
             content: "👑"; position: absolute; top: -25px; left: 50%;
-            transform: translateX(-50%); font-size: 2.5rem;
+            transform: translateX(-50%); font-size: 2.2rem;
         }
 
         .img-container {
-            width: 150px; height: 150px; margin: 10px auto 20px auto;
-            border-radius: 50%; overflow: hidden; border: 3px solid #444;
+            width: 110px; height: 110px; margin: 0 auto 15px auto;
+            border-radius: 50%; overflow: hidden; border: 2px solid #444;
         }
         .img-container img { width: 100%; height: 100%; object-fit: cover; }
 
-        .name { font-size: 1.6rem; font-weight: 800; text-transform: uppercase; }
-        .aura-value { font-size: 4.5rem; font-weight: 900; margin: 15px 0; }
-        .updated { color: var(--accent); transform: scale(1.1); transition: 0.2s; }
+        .name { font-size: 1.4rem; font-weight: 800; text-transform: uppercase; }
+        .aura-value { font-size: 3.5rem; font-weight: 900; margin: 10px 0; }
+        .updated { color: var(--accent); transform: scale(1.05); transition: 0.2s; }
 
-        .controls { display: flex; gap: 10px; }
-        button.action-btn {
-            background: rgba(255,255,255,0.05); border: 2px solid #444;
-            color: white; padding: 12px; font-size: 1.1rem;
-            border-radius: 12px; cursor: pointer; flex: 1;
+        /* --- NUOVI INPUT --- */
+        .input-group {
+            display: flex; flex-direction: column; gap: 8px; margin-top: 15px;
         }
-        button.action-btn:hover { border-color: var(--accent); }
-        button.minus:hover { border-color: var(--danger); color: var(--danger); }
+        .aura-input {
+            background: #000; border: 1px solid #444; color: var(--accent);
+            padding: 8px; border-radius: 8px; text-align: center; font-weight: bold; font-size: 1rem;
+        }
+        .reason-input {
+            background: #111; border: 1px solid #333; color: #fff;
+            padding: 8px; border-radius: 8px; font-size: 0.85rem;
+        }
+        .btn-row { display: flex; gap: 8px; }
+        .action-btn {
+            background: #222; border: 1.5px solid #444; color: white;
+            padding: 10px; font-size: 1rem; border-radius: 10px;
+            cursor: pointer; flex: 1; font-weight: bold;
+        }
+        .action-btn:hover { border-color: var(--accent); }
+        .action-btn.minus:hover { border-color: var(--danger); color: var(--danger); }
 
         .rank-badge {
-            font-size: 0.9rem; background: #333; padding: 4px 12px;
-            border-radius: 20px; margin-bottom: 10px; display: inline-block;
+            font-size: 0.8rem; background: #222; padding: 4px 10px;
+            border-radius: 20px; margin-bottom: 8px; display: inline-block;
         }
     </style>
 </head>
@@ -148,9 +162,14 @@
             <div class="img-container"><img src="gio.jpeg"></div>
             <div class="name">Salvo</div>
             <div id="aura-salvo" class="aura-value">0</div>
-            <div class="controls">
-                <button class="action-btn minus" onclick="updateAura('salvo', -100)">-100</button>
-                <button class="action-btn" onclick="updateAura('salvo', 100)">+100</button>
+            
+            <div class="input-group">
+                <input type="number" id="val-salvo" class="aura-input" value="100" placeholder="Valore">
+                <input type="text" id="reason-salvo" class="reason-input" placeholder="Perché? (opzionale)">
+                <div class="btn-row">
+                    <button class="action-btn minus" onclick="prepareUpdate('salvo', false)">-</button>
+                    <button class="action-btn" onclick="prepareUpdate('salvo', true)">+</button>
+                </div>
             </div>
         </div>
 
@@ -159,9 +178,14 @@
             <div class="img-container"><img src="gi.jpeg"></div>
             <div class="name">Giovanni</div>
             <div id="aura-giovanni" class="aura-value">0</div>
-            <div class="controls">
-                <button class="action-btn minus" onclick="updateAura('giovanni', -100)">-100</button>
-                <button class="action-btn" onclick="updateAura('giovanni', 100)">+100</button>
+
+            <div class="input-group">
+                <input type="number" id="val-giovanni" class="aura-input" value="100" placeholder="Valore">
+                <input type="text" id="reason-giovanni" class="reason-input" placeholder="Perché? (opzionale)">
+                <div class="btn-row">
+                    <button class="action-btn minus" onclick="prepareUpdate('giovanni', false)">-</button>
+                    <button class="action-btn" onclick="prepareUpdate('giovanni', true)">+</button>
+                </div>
             </div>
         </div>
 
@@ -170,14 +194,20 @@
             <div class="img-container"><img src="gioe.jpeg"></div>
             <div class="name">Gioele</div>
             <div id="aura-gioele" class="aura-value">0</div>
-            <div class="controls">
-                <button class="action-btn minus" onclick="updateAura('gioele', -100)">-100</button>
-                <button class="action-btn" onclick="updateAura('gioele', 100)">+100</button>
+
+            <div class="input-group">
+                <input type="number" id="val-gioele" class="aura-input" value="100" placeholder="Valore">
+                <input type="text" id="reason-gioele" class="reason-input" placeholder="Perché? (opzionale)">
+                <div class="btn-row">
+                    <button class="action-btn minus" onclick="prepareUpdate('gioele', false)">-</button>
+                    <button class="action-btn" onclick="prepareUpdate('gioele', true)">+</button>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="logs-container">
+        <div style="text-align:center; font-weight:bold; color:var(--accent); margin-bottom:10px; border-bottom:1px solid #333; font-size:0.9rem;">LOG EVENTI AURA</div>
         <div id="log-list"></div>
     </div>
 
@@ -199,41 +229,50 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- NOME UTENTE ---
         let myName = localStorage.getItem('aura_user');
         if (!myName) {
-            myName = prompt("Chi sta entrando?") || "Anonimo";
+            myName = prompt("Chi sei?") || "Anonimo";
             localStorage.setItem('aura_user', myName);
         }
 
-        // --- MUSICA ---
         const music = document.getElementById('bg-music');
         window.toggleMusic = () => {
-            if (music.paused) {
-                music.play();
-                document.getElementById('music-control').innerText = "⏸ PAUSE";
-            } else {
-                music.pause();
-                document.getElementById('music-control').innerText = "🎵 PLAY";
-            }
+            if (music.paused) { music.play(); document.getElementById('music-control').innerText = "⏸ PAUSE"; }
+            else { music.pause(); document.getElementById('music-control').innerText = "🎵 PLAY"; }
         };
 
-        // --- AGGIORNAMENTO AURA + LOG ---
-        window.updateAura = (user, amount) => {
+        // --- GESTIONE INVIO DATI ---
+        window.prepareUpdate = (target, isPositive) => {
+            const valInput = document.getElementById(`val-${target}`);
+            const reasonInput = document.getElementById(`reason-${target}`);
+            
+            const amount = Math.abs(parseInt(valInput.value)) || 0;
+            const finalAmount = isPositive ? amount : -amount;
+            const reason = reasonInput.value.trim() || "nessun motivo particolare";
+
+            if (amount === 0) return;
+
+            updateAura(target, finalAmount, reason);
+            
+            // Pulisci il campo motivazione dopo l'invio
+            reasonInput.value = "";
+        };
+
+        window.updateAura = (user, amount, reason) => {
             const userRef = ref(db, 'aura/' + user);
             runTransaction(userRef, (current) => (current || 0) + amount);
 
-            // Salva log nella cronologia
             push(ref(db, 'logs'), {
                 from: myName,
                 to: user,
                 val: amount,
+                reason: reason,
                 timestamp: Date.now()
             });
         };
 
-        // --- ASCOLTO CRONOLOGIA ---
-        const logsRef = query(ref(db, 'logs'), limitToLast(10));
+        // --- ASCOLTO CRONOLOGIA CON MOTIVAZIONE ---
+        const logsRef = query(ref(db, 'logs'), limitToLast(12));
         onValue(logsRef, (snapshot) => {
             const list = document.getElementById('log-list');
             list.innerHTML = "";
@@ -242,34 +281,33 @@
                 Object.values(data).reverse().forEach(log => {
                     const entry = document.createElement('div');
                     entry.className = 'log-entry';
-                    const verb = log.val > 0 ? "<span class='pos'>aggiunto</span>" : "<span class='neg'>rimosso</span>";
-                    entry.innerHTML = `<b>${log.from}</b> ha ${verb} ${Math.abs(log.val)} aura a <b>${log.to}</b>`;
+                    const verb = log.val > 0 ? "<span class='pos'>Aggiunto</span>" : "<span class='neg'>Rimosso</span>";
+                    entry.innerHTML = `
+                        <b>${log.from}</b> ha ${verb} ${Math.abs(log.val)} aura a <b>${log.to}</b>
+                        <span class="log-reason">Motivo: ${log.reason}</span>
+                    `;
                     list.appendChild(entry);
                 });
             }
         });
 
-        // --- CLASSIFICA ---
+        // --- CLASSIFICA (Invariata) ---
         onValue(ref(db, 'aura/'), (snapshot) => {
             const data = snapshot.val() || { salvo: 0, giovanni: 0, gioele: 0 };
-            const players = [
-                { id: 'salvo', aura: data.salvo || 0 },
-                { id: 'giovanni', aura: data.giovanni || 0 },
-                { id: 'gioele', aura: data.gioele || 0 }
-            ];
-            players.sort((a, b) => b.aura - a.aura);
-            players.forEach((player, index) => {
-                const card = document.getElementById(`card-${player.id}`);
-                const display = document.getElementById(`aura-${player.id}`);
-                const rank = document.getElementById(`rank-${player.id}`);
-                if (display.innerText != player.aura) {
-                    display.innerText = player.aura;
+            const players = [{id:'salvo',aura:data.salvo||0},{id:'giovanni',aura:data.giovanni||0},{id:'gioele',aura:data.gioele||0}];
+            players.sort((a,b)=>b.aura-a.aura);
+            players.forEach((p,i)=>{
+                const card = document.getElementById(`card-${p.id}`);
+                const display = document.getElementById(`aura-${p.id}`);
+                const rank = document.getElementById(`rank-${p.id}`);
+                if(display.innerText != p.aura){
+                    display.innerText = p.aura;
                     display.classList.add('updated');
-                    setTimeout(() => display.classList.remove('updated'), 400);
+                    setTimeout(()=>display.classList.remove('updated'),400);
                 }
-                card.style.order = index;
-                rank.innerText = `#${index + 1}`;
-                index === 0 ? card.classList.add('top-1') : card.classList.remove('top-1');
+                card.style.order = i;
+                rank.innerText = `#${i+1}`;
+                i===0?card.classList.add('top-1'):card.classList.remove('top-1');
             });
         });
     </script>
