@@ -7,7 +7,7 @@
     <style>
         :root {
             --bg: #050505;
-            --card: #111;
+            --card: rgba(20, 20, 20, 0.9);
             --text: #ffffff;
             --accent: #00f2ff;
             --danger: #ff4d4d;
@@ -24,7 +24,35 @@
             min-height: 100vh;
             margin: 0;
             padding: 20px;
+            overflow-x: hidden;
+            position: relative;
         }
+
+        /* --- EFFETTO FOTO SPARSE SULLO SFONDO --- */
+        .background-photos {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        .sparse-photo {
+            position: absolute;
+            width: 200px;
+            border: 5px solid white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+        }
+
+        /* Posizioni "casuali" fisse per le foto sparse */
+        .p1 { top: 10%; left: 5%; transform: rotate(-15deg); }
+        .p2 { top: 60%; left: 80%; transform: rotate(10deg); width: 250px; }
+        .p3 { top: 75%; left: 10%; transform: rotate(5deg); }
+        .p4 { top: 5%; left: 75%; transform: rotate(-10deg); }
 
         h1 {
             font-size: clamp(2rem, 8vw, 3.5rem);
@@ -33,107 +61,113 @@
             margin-bottom: 40px;
             text-shadow: 0 0 15px var(--accent);
             text-align: center;
+            z-index: 10;
         }
 
-        /* Container Grid che permette l'ordinamento dinamico */
         .container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 25px;
-            width: 100%;
-            max-width: 1100px;
-            /* Importante per l'ordinamento tramite JS */
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
+            gap: 25px;
+            width: 100%;
+            max-width: 1100px;
+            z-index: 10;
         }
 
         .user-card {
             background: var(--card);
+            backdrop-filter: blur(10px);
             padding: 30px;
             border-radius: 24px;
             text-align: center;
-            border: 1px solid #222;
+            border: 1px solid #333;
             transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
             width: 300px;
             position: relative;
         }
 
-        /* Effetto per il primo in classifica */
         .user-card.top-1 {
             border-color: var(--gold);
-            box-shadow: 0 0 30px rgba(255, 215, 0, 0.15);
+            box-shadow: 0 0 40px rgba(255, 215, 0, 0.2);
             transform: scale(1.05);
         }
 
         .user-card.top-1::after {
             content: "👑";
             position: absolute;
-            top: -20px;
+            top: -25px;
             left: 50%;
             transform: translateX(-50%);
-            font-size: 2rem;
+            font-size: 2.5rem;
+            filter: drop-shadow(0 0 10px var(--gold));
         }
 
-        .name {
-            font-size: 1.6rem;
-            font-weight: 800;
-            margin-bottom: 5px;
-            text-transform: uppercase;
+        .img-container {
+            width: 150px;
+            height: 150px;
+            margin: 10px auto 20px auto;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid #444;
+            background: #222;
         }
 
-        .aura-value {
-            font-size: 4.5rem;
-            font-weight: 900;
-            margin: 20px 0;
-            font-variant-numeric: tabular-nums;
+        .img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .updated {
-            color: var(--accent);
-            transform: scale(1.1);
-        }
+        .user-card.top-1 .img-container { border-color: var(--gold); }
 
-        .controls {
-            display: flex;
-            gap: 10px;
-        }
+        .name { font-size: 1.6rem; font-weight: 800; text-transform: uppercase; }
+        .aura-value { font-size: 4.5rem; font-weight: 900; margin: 15px 0; }
+        
+        .updated { color: var(--accent); transform: scale(1.1); transition: 0.2s; }
 
+        .controls { display: flex; gap: 10px; }
         button {
-            background: #1a1a1a;
-            border: 2px solid #333;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid #444;
             color: white;
             padding: 12px;
             font-size: 1.1rem;
             font-weight: bold;
             border-radius: 12px;
             cursor: pointer;
-            transition: 0.2s;
             flex: 1;
         }
 
-        button:hover { border-color: var(--accent); }
+        button:hover { border-color: var(--accent); background: rgba(0,242,255,0.1); }
         button.minus:hover { border-color: var(--danger); color: var(--danger); }
-        button:active { transform: scale(0.9); }
 
-        /* Badge posizione */
         .rank-badge {
             font-size: 0.9rem;
             background: #333;
             padding: 4px 12px;
             border-radius: 20px;
-            display: inline-block;
             margin-bottom: 10px;
+            display: inline-block;
         }
     </style>
 </head>
 <body>
+
+    <div class="background-photos">
+        <img src="gio.jpeg" class="sparse-photo p1">
+        <img src="gioele.jpeg" class="sparse-photo p2">
+        <img src="gi.jpeg" class="sparse-photo p3">
+        <img src="gioe.jpeg" class="sparse-photo p4">
+    </div>
 
     <h1>AURA COUNTER</h1>
 
     <div class="container" id="leaderboard">
         <div id="card-salvo" class="user-card">
             <div id="rank-salvo" class="rank-badge"># -</div>
+            <div class="img-container">
+                <img src="gio.jpeg" alt="Salvo">
+            </div>
             <div class="name">Salvo</div>
             <div id="aura-salvo" class="aura-value">0</div>
             <div class="controls">
@@ -144,6 +178,9 @@
 
         <div id="card-giovanni" class="user-card">
             <div id="rank-giovanni" class="rank-badge"># -</div>
+            <div class="img-container">
+                <img src="gi.jpeg" alt="Giovanni">
+            </div>
             <div class="name">Giovanni</div>
             <div id="aura-giovanni" class="aura-value">0</div>
             <div class="controls">
@@ -154,6 +191,9 @@
 
         <div id="card-gioele" class="user-card">
             <div id="rank-gioele" class="rank-badge"># -</div>
+            <div class="img-container">
+                <img src="gioe.jpeg" alt="Gioele">
+            </div>
             <div class="name">Gioele</div>
             <div id="aura-gioele" class="aura-value">0</div>
             <div class="controls">
@@ -181,7 +221,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Aggiornamento Aura
         window.updateAura = (user, amount) => {
             const userRef = ref(db, 'aura/' + user);
             runTransaction(userRef, (currentValue) => {
@@ -189,19 +228,15 @@
             });
         };
 
-        // Gestione Real-time e Classifica
         const auraRef = ref(db, 'aura/');
         onValue(auraRef, (snapshot) => {
             const data = snapshot.val() || { salvo: 0, giovanni: 0, gioele: 0 };
-            
-            // Crea array per ordinare
             const players = [
                 { id: 'salvo', aura: data.salvo || 0 },
                 { id: 'giovanni', aura: data.giovanni || 0 },
                 { id: 'gioele', aura: data.gioele || 0 }
             ];
 
-            // Ordina per aura decrescente
             players.sort((a, b) => b.aura - a.aura);
 
             players.forEach((player, index) => {
@@ -209,23 +244,15 @@
                 const valueDisplay = document.getElementById(`aura-${player.id}`);
                 const rankDisplay = document.getElementById(`rank-${player.id}`);
 
-                // Aggiorna numero con animazione se cambiato
                 if (valueDisplay.innerText != player.aura) {
                     valueDisplay.innerText = player.aura;
                     valueDisplay.classList.add('updated');
                     setTimeout(() => valueDisplay.classList.remove('updated'), 400);
                 }
 
-                // Cambia ordine CSS (0 è il primo, 1 secondo, etc)
                 card.style.order = index;
                 rankDisplay.innerText = `#${index + 1}`;
-
-                // Aggiungi corona al primo
-                if (index === 0) {
-                    card.classList.add('top-1');
-                } else {
-                    card.classList.remove('top-1');
-                }
+                index === 0 ? card.classList.add('top-1') : card.classList.remove('top-1');
             });
         });
     </script>
